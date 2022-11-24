@@ -41,15 +41,16 @@ packages:
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
 extra-deps:
- - arduino-copilot-1.7.3
- - copilot-3.11
- - copilot-c99-3.11
- - copilot-language-3.11
- - sketch-frp-copilot-1.0.4
- - copilot-core-3.11
- - copilot-interpreter-3.11
- - copilot-libraries-3.11
- - copilot-theorem-3.11
+ - arduino-copilot-1.7.4
+ - copilot-3.12
+ - copilot-c99-3.12
+ - copilot-language-3.12
+ - sketch-frp-copilot-1.0.5
+ - copilot-core-3.12
+ - copilot-interpreter-3.12
+ - copilot-prettyprinter-3.12
+ - copilot-theorem-3.12
+ - copilot-libraries-3.12
  - language-c99-0.2.0
  - language-c99-simple-0.2.2
  - bimap-0.5.0

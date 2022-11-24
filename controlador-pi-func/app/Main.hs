@@ -14,9 +14,9 @@ kp :: Behavior Word8
 kp = 2
 
 equivalenciaGradosDe :: Behavior ADC  -> Behavior Float
-equivalenciaGradosDe unValor = adaptarValor * (constant 500/1023)
-    where adaptarValor :: Behavior Float
-          adaptarValor = unsafeCast unValor
+equivalenciaGradosDe unValor = valorTipadoAdaptado * (constant 500/1023)
+    where valorTipadoAdaptado :: Behavior Float
+          valorTipadoAdaptado = unsafeCast unValor
 
 leerValorAnalogico :: IsAnalogInputPin unaEntrada => Pin unaEntrada -> Sketch (Behavior ADC)
 leerValorAnalogico unaEntrada = do
@@ -29,21 +29,29 @@ mostrarLecturaSerial unTexto unaLectura = do
     let msg = [Serial.str unTexto, Serial.show unaLectura, Serial.str "\n"]
     Serial.device =: msg
 
-unaCondicion :: Behavior ADC -> Behavior Bool
-unaCondicion unError = unError >= 0 && unError <= 255
-
 deWord16HaciaWord8 :: Behavior Word16 -> Behavior Word8
 deWord16HaciaWord8 unValor = unsafeCast unValor
 
 -- 1023/255 aprox = 4
-mapearValor :: Behavior ADC -> Behavior Word8
-mapearValor unValor = (*4).deWord16HaciaWord8.adaptarValor $ unValor
-        where adaptarValor :: Behavior Int16 -> Behavior Word16
-              adaptarValor unValorPri = unsafeCast unValorPri
+adaptarValor :: Behavior ADC -> Behavior Word8
+adaptarValor unValor = (*4).deWord16HaciaWord8.adaptarTipado $ unValor
+        where adaptarTipado :: Behavior Int16 -> Behavior Word16
+              adaptarTipado unValorPri = unsafeCast unValorPri
 
 controlProporcional :: Behavior Word8 -> Behavior Word8
 controlProporcional unError = kp * unError 
 
+-- Similar al uso de guardas, con una funcion provista por la biblioteca
+-- por temas de tipado.
+controlPositivo :: Behavior ADC -> Behavior ADC
+controlPositivo unError = mux (unaCondicion unError) unError 0
+
+unaCondicion :: Behavior ADC -> Behavior Bool
+unaCondicion unError = unError >= 0 && unError <= 255
+
+prepararError :: Behavior ADC -> Behavior Word8
+prepararError unError = adaptarValor . controlPositivo $ unError
+    
 main :: IO ()
 main = arduino $ do 
     -- Leer valor de refencia
@@ -56,8 +64,8 @@ main = arduino $ do
 
     (mostrarLecturaSerial "Temperatura leida: ").equivalenciaGradosDe $ lecturaTemperatura
     (mostrarLecturaSerial "Valor de referencia: " ).equivalenciaGradosDe $ valorDeReferencia
-    mostrarLecturaSerial "Valor PWM: " valorDeError    
+    mostrarLecturaSerial "Valor ERROR: " valorDeError
 
-    pin5 =: (pwm . controlProporcional . mapearValor $ valorDeError)
+    pin5 =: (pwm . controlProporcional . prepararError $ valorDeError)
 
     delay =: MilliSeconds (constant 1000)
