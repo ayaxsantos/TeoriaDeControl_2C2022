@@ -68,4 +68,4 @@ main = arduino $ do
 
     pin5 =: (pwm . controlProporcional . prepararError $ valorDeError)
 
-    delay =: MilliSeconds (constant 1000)
+    --delay =: MilliSeconds (constant 1000)
