@@ -44,14 +44,14 @@ controlProporcional unError = kp * unError
 -- Similar al uso de guardas, con una funcion provista por la biblioteca
 -- por temas de tipado.
 controlPositivo :: Behavior ADC -> Behavior ADC
-controlPositivo unError = mux (unaCondicion unError) unError 0
+controlPositivo unError = mux (estaDentroDelRangoUtil unError) unError 0
 
-unaCondicion :: Behavior ADC -> Behavior Bool
-unaCondicion unError = unError >= 0 && unError <= 255
+estaDentroDelRangoUtil :: Behavior ADC -> Behavior Bool
+estaDentroDelRangoUtil unError = unError >= 0 && unError <= 255
 
 prepararError :: Behavior ADC -> Behavior Word8
 prepararError unError = adaptarValor . controlPositivo $ unError
-    
+
 main :: IO ()
 main = arduino $ do 
     -- Leer valor de refencia
